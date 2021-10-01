@@ -1,0 +1,358 @@
+#define _CRT_SECURE_NO_WARNINGS
+
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <complex>
+#include <math.h>
+#include <set>
+#include <vector>
+#include <map>
+#include <queue>
+#include <stdio.h>
+#include <stack>
+#include <algorithm>
+#include <list>
+#include <ctime>
+#include <memory.h>
+#include <assert.h>
+
+#define y0 sdkfaslhagaklsldk
+#define y1 aasdfasdfasdf
+#define yn askfhwqriuperikldjk
+#define j1 assdgsdgasghsf
+#define tm sdfjahlfasfh
+#define lr asgasgash
+#define norm asdfasdgasdgsd
+
+#define eps 1e-9
+#define M_PI 3.141592653589793
+#define bs 1000000007
+#define bsize 256
+
+using namespace std;
+
+const int INF = 1e9;
+const int N = 500331;
+
+string st1, st2;
+
+vector<int> levels;
+vector<pair<int, string> > ans;
+
+bool not_larger(vector<int> &v1, vector<int> &v2)
+{
+    if (v1.size() != v2.size())
+    {
+        return v1.size() < v2.size();
+    }
+    for (int i = v1.size() - 1; i >= 0; --i)
+    {
+        if (v1[i] != v2[i])
+            return v1[i] < v2[i];
+    }
+    return true;
+}
+
+vector<int> get_id(string st)
+{
+    vector<int> res;
+    reverse(st.begin(), st.end());
+    for (int i = 0; i < st.size(); i++)
+    {
+        res.push_back(st[i] - 48);
+    }
+    return res;
+}
+
+string eval(vector<int> v)
+{
+    string res;
+    res.resize(v.size());
+    for (int i = 0; i < v.size(); i++)
+        res[i]=(v[i] + 48);
+    reverse(res.begin(), res.end());
+    return res; 
+}
+
+vector<int> get_vec(vector<int> v, int ps)
+{
+    while (v.size() <= ps)
+        v.push_back(0);
+    v.push_back(0);
+    v[ps]++;
+    int ost = 0;
+    for (int i = 0; i < v.size(); i++)
+    {
+        v[i] += ost;
+        ost = v[i] / 10;
+        v[i] %= 10;
+    }
+    while (v.size()>1 && v.back() == 0)
+        v.pop_back();
+    return v;
+}
+
+vector<int> normalize(vector<int> v, int shi)
+{
+    vector<int> res;
+    for (int i = shi; i < v.size(); i++)
+        res.push_back(v[i]);
+    if (res.size() == 0)
+        res.push_back(0);
+    return res;
+}
+
+vector<int> get_dif(vector<int> a, vector<int> b)
+{
+    while (b.size() < a.size())
+        b.push_back(0);
+    int ost = 0;
+    for (int i = 0; i < a.size(); ++i)
+    {
+        a[i] -= b[i];
+        a[i] -= ost;
+        if (a[i] < 0)
+            ost = 1, a[i] += 10;
+        else
+            ost = 0;
+    }
+    while (a.size()>1 && a.back() == 0)
+        a.pop_back();
+    return a;
+}
+
+vector<int> renorm(vector<int> v)
+{
+    int ost = 0;
+    for (int i = 0; i < v.size(); i++)
+    {
+        v[i] += ost;
+        ost = v[i] / 10;
+        v[i] %= 10;
+    }
+    v.push_back(ost);
+    while (v.size()>1 && v.back() == 0)
+        v.pop_back();
+    return v;
+}
+
+vector<int> get_next(vector<int> v, int ps)
+{
+    while (v.size() <= ps)
+        v.push_back(0);
+    int shit = 0;
+    for (int i = 0; i < ps; i++)
+    {
+        if (v[i] != 0)
+            shit = 1;
+    }
+    if (shit == 0)
+    {
+        return renorm(v);
+    }
+    //cout << v.size() << "%" << ps << " " << endl;
+    v[ps]++;
+    for (int i = 0; i < ps; i++)
+        v[i] = 0;
+    return renorm(v);
+}
+
+vector<int> get_next2(vector<int> v, int ps)
+{
+    while (v.size() <= ps)
+        v.push_back(0);
+    int shit = 0;
+    for (int i = 0; i < ps; i++)
+    {
+        if (v[i] != 0)
+            shit = 1;
+    }
+    shit = 1;
+    if (shit == 0)
+    {
+        return renorm(v);
+    }
+    v[ps]++;
+    for (int i = 0; i < ps; i++)
+        v[i] = 0;
+    return renorm(v);
+}
+vector<int> min1(vector<int> v)
+{
+    int q = 0;
+    while (v[q] == 0)
+    {
+        v[q] = 9;
+        ++q;
+    }
+    v[q]--;
+    while (v.size() > 1 && v.back() == 0)
+        v.pop_back();
+    return v;
+}
+
+void show(vector<int> v)
+{
+    reverse(v.begin(), v.end());
+    for (int i = 0; i < v.size(); i++)
+        cout << v[i];
+    cout << endl;
+}
+
+void norm_suf(vector<int> &v, int suf)
+{
+    while (v.size() < suf)
+        v.push_back(0);
+    for (int i = 0; i < suf; i++)
+        v[i] = 0;
+    while (v.size()>1 && v.back() == 0)
+        v.pop_back();
+    return;
+}
+
+vector<int> add(vector<int> a, vector<int> b)
+{
+    while (a.size() < b.size())
+        a.push_back(0);
+    while (b.size() < a.size())
+        b.push_back(0);
+    int ost = 0;
+    for (int i = 0; i < a.size(); i++)
+    {
+        a[i] = a[i] + b[i] + ost;
+        ost = a[i] / 10;
+        a[i] %= 10;
+    }
+    a.push_back(ost);
+    while (a.size()>1 && a.back() == 0)
+        a.pop_back();
+    return a;
+}
+
+vector<pair<int, string> > compress(vector<pair<int, string> > v)
+{
+    vector<pair<int, string> > res;
+    pair<int, string> cur;
+    cur = v[0];
+    for (int i = 1; i < v.size(); i++)
+    {
+        if (v[i].first == v[i - 1].first)
+        {
+            string temp1 = cur.second;
+            string temp2 = v[i].second;
+            vector<int> v1 = get_id(temp1);
+            vector<int> v2 = get_id(temp2);
+            v1 = add(v1, v2);
+            cur.second = eval(v1);
+        }
+        else
+        {
+            res.push_back(cur);
+            cur = v[i];
+        }
+    }
+    res.push_back(cur);
+    return res;
+}
+int main(){
+    //freopen("fabro.in","r",stdin);
+    //freopen("fabro.out","w",stdout);
+    //freopen("F:/in.txt", "r", stdin);
+    //freopen("F:/output.txt", "w", stdout);
+    ios_base::sync_with_stdio(0);
+    //cin.tie(0);
+
+    cin >> st1 >> st2;
+
+/*    st1 = "0";
+    st2 = "1";
+    for (int i = 1; i <= 1000000; i++)
+        st2 += "0";
+        */
+    levels.push_back(0);
+    for (int i = 0; i <= 20; i++)
+    {
+        levels.push_back(1 << i);
+    }
+
+    vector<int> v1 = get_id(st1);
+    v1 = min1(v1);
+    vector<int> v2 = get_id(st2);
+
+    for (int i = 0; i+1 < levels.size(); i++)
+    {
+        //cout << i << " " << clock()*1.0 / CLOCKS_PER_SEC << endl;
+
+        vector<int> next1 = get_next(v1, levels[i+1]);
+        vector<int> next2 = v2;
+        /*cout << "#" << i << endl;
+        if (i < 5)
+        {
+            show(next1);
+            show(next2);
+            show(v1);
+        }*/
+        if (not_larger(next2, next1))
+            continue;
+        vector<int> V = get_dif(next1, v1);
+        //cout << "@@" << endl;
+        //show(V);
+        //cout << "%" << i << " " << clock()*1.0 / CLOCKS_PER_SEC << endl;
+        V = normalize(V, levels[i]);
+        //cout << "%" << i << " " << clock()*1.0 / CLOCKS_PER_SEC << endl;
+
+        if (V.size() > 1 || V[0] != 0)
+        {
+            ans.push_back(make_pair(i, eval(V)));
+            v1 = next1;
+        }
+        v1 = next1;
+    }
+    for (int i = levels.size()-2; i >=0; i--)
+    {
+        vector<int> next1 = get_next2(v1, levels[i+1]);
+        vector<int> next2 = v2;
+
+        norm_suf(next2, levels[i]);
+
+        /*cout << "#" << i << endl;
+        if (i < 5)
+        {
+            show(next1);
+            show(next2);
+            show(v1);
+        }
+        */
+        if (not_larger(next2, next1))
+            next1 = next2;
+        if (!not_larger(v1, next1))
+            continue;
+
+        vector<int> V = get_dif(next1, v1);
+        V = normalize(V, levels[i]);
+
+        if (V.size() > 1 || V[0] != 0)
+        {
+            ans.push_back(make_pair(i, eval(V)));
+            v1 = next1;
+        }
+    }
+
+    vector<int> V = get_dif(v2, v1);
+
+    if (V.size()>1 || V[0] != 0)
+        ans.push_back(make_pair(0, eval(V)));
+
+    ans = compress(ans);
+
+    cout << ans.size() << endl;
+
+    for (int i = 0; i < ans.size(); i++)
+    {
+        cout << ans[i].first << " " << ans[i].second << endl;
+    }
+
+    cin.get(); cin.get();
+    return 0;
+}
