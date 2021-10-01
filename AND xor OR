@@ -1,0 +1,83 @@
+#include <cmath>
+#include <cstdio>
+#include <vector>
+#include <iostream>
+#include <algorithm>
+#include <stack>
+using namespace std;
+
+
+int main() {
+   
+    
+    
+    int n;
+    cin>>n;
+    
+    int * arr;
+    
+    
+    arr =  new int[n];
+    
+    
+    for(int i=0;i<n;i++)cin>>arr[i];
+    
+    stack<int> S;
+    
+    int m = 0;
+    
+    for(int i=0;i<n;i++)
+    {
+        while(true)
+        {
+            if(S.empty())
+            {
+                S.push(arr[i]);
+                break;
+            }
+            
+            else if(S.top() < arr[i] )
+            {
+                m = max(m, S.top()^arr[i]);
+                S.push(arr[i]);
+                break;
+            }
+            else
+            {
+                S.pop();
+            }
+        }        
+    }
+    
+    
+    stack<int> S2;
+    
+    
+    for(int i=n-1;i>=0;i--)
+    {
+        while(true)
+        {
+            if(S.empty())
+            {
+                S.push(arr[i]);
+                break;
+            }
+            
+            else if(S.top() < arr[i] )
+            {
+                m = max(m, S.top()^arr[i]);
+                S.push(arr[i]);
+                break;
+            }
+            else
+            {
+                S.pop();
+            }
+        }        
+    }
+    
+    
+    
+    cout<<m<<endl;
+    return 0;
+}
